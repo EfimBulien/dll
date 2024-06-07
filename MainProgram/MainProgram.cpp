@@ -2,47 +2,47 @@
 #include <windows.h>
 #include <string>
 
-typedef bool (*ContainsAllCharactersFunc)(const char*, const char*);
+typedef bool (*contains_all_characters_func)(const char*, const char*);
 
 int main() {
-    std::string inputStr, searchChars;
+    std::string input_str, search_chars;
     std::cout << "Enter a string: ";
-    std::getline(std::cin, inputStr);
+    std::getline(std::cin, input_str);
     std::cout << "Enter characters to search for: ";
-    std::getline(std::cin, searchChars);
+    std::getline(std::cin, search_chars);
 
-    HMODULE hModule = LoadLibrary(TEXT("StringChecker.dll"));
-    if (hModule == NULL) {
-        std::cerr << "Could not load the dynamic library." << std::endl;
+    const HMODULE h_module = LoadLibrary(TEXT("StringChecker.dll"));
+    if (h_module == nullptr) {
+        std::cerr << "Could not load the dynamic library." << '\n';
         return 1;
     }
 
-    ContainsAllCharactersFunc containsAllCharacters =
-        (ContainsAllCharactersFunc)GetProcAddress(hModule, "containsAllCharacters");
-    if (!containsAllCharacters) {
-        std::cerr << "Could not locate the function." << std::endl;
-        FreeLibrary(hModule);
+    const auto contains_all_characters = reinterpret_cast<contains_all_characters_func>
+        (GetProcAddress(h_module, "containsAllCharacters"));
+    if (!contains_all_characters) {
+        std::cerr << "Could not locate the function." << '\n';
+        FreeLibrary(h_module);
         return 1;
     }
 
-    bool result = containsAllCharacters(inputStr.c_str(), searchChars.c_str());
-    int foundCount = 0;
-    for (char ch : searchChars) {
-        if (inputStr.find(ch) != std::string::npos) {
-            foundCount++;
+    const bool result = contains_all_characters(input_str.c_str(), search_chars.c_str());
+    int found_count = 0;
+    for (const char ch : search_chars) {
+        if (input_str.find(ch) != std::string::npos) {
+            found_count++;
         }
     }
 
     if (result) {
-        std::cout << "All characters are found in the string." << std::endl;
+        std::cout << "All characters are found in the string." << '\n';
     }
     else {
-        std::cout << "Not all characters are found in the string." << std::endl;
+        std::cout << "Not all characters are found in the string." << '\n';
     }
 
-    std::cout << "Found " << foundCount << " out of " << searchChars.length() << " characters." << std::endl;
+    std::cout << "Found " << found_count << " out of " << search_chars.length() << " characters." << '\n';
 
-    FreeLibrary(hModule);
+    FreeLibrary(h_module);
 
     return 0;
 }
